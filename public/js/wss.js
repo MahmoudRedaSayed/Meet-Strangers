@@ -13,10 +13,17 @@ socketIo=socket;
         ui.updatePersonalCode(socket.id);
       });
       socket.on("pre-offer",webRTCHandler.preOfferHandler)
+      socket.on("pre-offer-answer", (data) => {
+        webRTCHandler.handlePreOfferAnswer(data);
+      });
 }
 
 export const sendPreOffer = (data) => {
     console.log("emmiting to server pre offer event");
     socketIo.emit("pre-offer", data);
+  };
+
+  export const sendPreOfferAnswer = (data) => {
+    socketIo.emit("pre-offer-answer", data);
   };
 
