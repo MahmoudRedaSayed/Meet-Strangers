@@ -9,9 +9,22 @@ io.on("connection",(socket)=>{
     console.log("the server is connected");
     console.log("the id of the socket",socket.id);
     console.log("connected",connectedPeers);
+    socket.on("pre-offer",(data)=>{
+        const{callType,calleePersonalCode}=data;
+        const calleepersonal=connectedPeers.find(person=>
+            person===data.calleePersonalCode)
+        console.log("the user is ",calleepersonal)
+        if(calleepersonal)
+        {
+            const data = {
+                callerSocketId: socket.id,
+                callType,
+              };
+              io.to(calleepersonal).emit("pre-offer",data)
+        }
+    })
     socket.on("disconnect",()=>{
         connectedPeers=connectedPeers.filter((connected)=>connected!==socket.id)
-        // connectedPeers=connectedPeersTemp;
         console.log("disconnect",connectedPeers);
     })
 })
