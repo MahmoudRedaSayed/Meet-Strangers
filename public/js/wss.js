@@ -35,6 +35,9 @@ socketIo=socket;
 
         }
       })
+      socket.on("hang-Up",()=>{
+        webRTCHandler.hangUpHandlerAnswer();
+      })
 }
 
 export const sendPreOffer = (data) => {
@@ -52,3 +55,7 @@ export const sendDataUsingWebRTCSignals=(data)=>{
   socketIo.emit("WebRTC-Signal",data);
 }
 
+export const sendHangUp=(data)=>{
+  console.log("send signal");
+  socketIo.emit("hang-Up",data)
+}

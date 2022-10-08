@@ -229,3 +229,28 @@ export const switchRecordingButtons = (switchForResumeButton = false) => {
     showElement(pauseButton);
   }
 };
+
+export const mediaStream=(callType)=>{
+  const finishConnectionChatButtonContainer = document.getElementById(
+    "finish_chat_button_container"
+  );
+  hideElement(finishConnectionChatButtonContainer);
+
+  if(callType===constants.callType.VIDEO_PERSONAL_CODE||callType===constants.callType.VIDEO_STRANGER)
+  {
+    const callButtons = document.getElementById("call_buttons");
+      hideElement(callButtons);
+    
+      const placeholder = document.getElementById("video_placeholder");
+      showElement(placeholder);
+
+  }
+  
+    const newMessageInput = document.getElementById("new_message");
+    showElement(newMessageInput);
+    clearMessenger();
+    const newMessage=document.getElementById("new_message");
+    hideElement(newMessage);
+    //block panel
+    enableDashboard();
+}

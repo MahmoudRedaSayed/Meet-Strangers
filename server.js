@@ -51,6 +51,17 @@ io.on("connection",(socket)=>{
         }
 
       })
+
+      socket.on("hang-Up", (data) => {
+        const connectedUserSocketId=connectedPeers.find(person=>
+            person===data.connectedUserSocketId)
+        if(connectedUserSocketId)
+        {
+            io.to(connectedUserSocketId).emit("hang-Up",data)
+        }
+
+      })
+
     socket.on("disconnect",()=>{
         connectedPeers=connectedPeers.filter((connected)=>connected!==socket.id)
         console.log("disconnect",connectedPeers);

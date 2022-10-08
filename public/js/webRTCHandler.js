@@ -308,3 +308,17 @@ export const switchBetweenCameraAndScreenSharing = async (
     }
   }
 };
+
+
+export const hangUpHandler=()=>{
+  const data={
+    connectedUserSocketId:connectedUserDetails.socketId
+  }
+  wss.sendHangUp(data);
+  ui.mediaStream(connectedUserDetails.callType);
+}
+
+export const hangUpHandlerAnswer=()=>{
+  ui.mediaStream(connectedUserDetails.callType);
+  console.log("answer the hang up")
+}
