@@ -4,6 +4,7 @@ import * as constants from "./constants.js"
 import * as store from "./store.js"
 let connectedUserDetails = null;
 let peerConnection;
+let dataChannel;
 const defaultCon = {
   audio: true,
   video: true
@@ -118,6 +119,21 @@ export const getLocalPreview = () => {
 
 export const createPeerConnection = () => {
   peerConnection = new RTCPeerConnection(configurations);
+  dataChannel = peerConnection.createDataChannel("chat");
+
+  peerConnection.ondatachannel = (event) => {
+    const dataChannel = event.channel;
+
+    dataChannel.onopen = () => {
+      console.log("peer connection is ready to receive data channel messages");
+    };
+
+    dataChannel.onmessage = (event) => {
+      console.log("message came from data channel");
+      const message = JSON.parse(event.data);
+      ui.appendMessage(message);
+    };
+  };
   peerConnection.onicecandidate = (event) => {
     if (event.candidate) {
       // send it to the other user
@@ -164,8 +180,28 @@ const sendWebRTCOffer=async()=>{
   }
   wss.sendDataUsingWebRTCSignals(data)
 }
+
+export const sendMessageUsingDataChannel = (message) => {
+  const stringifiedMessage = JSON.stringify(message);
+  dataChannel.send(stringifiedMessage);
+};
 export const offerHandler=async(data)=>{
   peerConnection = new RTCPeerConnection(configurations);
+  dataChannel = peerConnection.createDataChannel("chat");
+
+  peerConnection.ondatachannel = (event) => {
+    const dataChannel = event.channel;
+
+    dataChannel.onopen = () => {
+      console.log("peer connection is ready to receive data channel messages");
+    };
+
+    dataChannel.onmessage = (event) => {
+      console.log("message came from data channel");
+      const message = JSON.parse(event.data);
+      ui.appendMessage(message);
+    };
+  };
   const remoteStream = new MediaStream();
   store.setRemoteStream(remoteStream);
   ui.setRemoteStream(remoteStream);
