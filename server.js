@@ -41,6 +41,16 @@ io.on("connection",(socket)=>{
           io.to(data.callerSocketId).emit("pre-offer-answer", data);
         }
       });
+
+      socket.on("WebRTC-Signal", (data) => {
+        const connectedUserSocketId=connectedPeers.find(person=>
+            person===data.connectedUserSocketId)
+        if(connectedUserSocketId)
+        {
+            io.to(connectedUserSocketId).emit("WebRTC-Signal",data)
+        }
+
+      })
     socket.on("disconnect",()=>{
         connectedPeers=connectedPeers.filter((connected)=>connected!==socket.id)
         console.log("disconnect",connectedPeers);

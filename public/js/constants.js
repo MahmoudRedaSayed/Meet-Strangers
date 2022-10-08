@@ -11,3 +11,9 @@ export const callType = {
     CALL_REJECTED: "CALL_REJECTED",
     CALL_UNAVAILABLE: "CALL_UNAVAILABLE",
   };
+
+  export const WebRTCSignaling={
+    OFFER:"OFFER",
+    ANSWER:"ANSWER",
+    ICECANDIDATE:"ICECANDIDATE",
+  }

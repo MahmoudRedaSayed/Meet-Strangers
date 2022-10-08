@@ -16,6 +16,25 @@ socketIo=socket;
       socket.on("pre-offer-answer", (data) => {
         webRTCHandler.handlePreOfferAnswer(data);
       });
+      socket.on("WebRTC-Signal",(data)=>{
+        switch(data.type)
+        {
+          case constants.WebRTCSignaling.OFFER:
+            webRTCHandler.offerHandler(data)
+            break;
+
+          case constants.WebRTCSignaling.ANSWER:
+            webRTCHandler.answerHandler(data)
+            break;
+
+          case constants.WebRTCSignaling.ICECANDIDATE:
+            webRTCHandler.candidateHandler(data)
+            break;
+          default:
+            return;
+
+        }
+      })
 }
 
 export const sendPreOffer = (data) => {
@@ -26,4 +45,10 @@ export const sendPreOffer = (data) => {
   export const sendPreOfferAnswer = (data) => {
     socketIo.emit("pre-offer-answer", data);
   };
+
+
+export const sendDataUsingWebRTCSignals=(data)=>{
+  console.log("send data")
+  socketIo.emit("WebRTC-Signal",data);
+}
 

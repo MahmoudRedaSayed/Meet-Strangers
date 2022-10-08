@@ -5,6 +5,19 @@ export const updatePersonalCode=(code)=>{
     personalCode.innerHTML=code;
 }
 
+export const updateLocalVideo=(stream)=>{
+  const localvideo=document.getElementById("local_video");
+  localvideo.srcObject=stream;
+  localvideo.addEventListener("loadedmetadata",()=>{
+    localvideo.play();
+  })
+}
+
+export const setRemoteStream=(stream)=>{
+  const remotevideo=document.getElementById("remote_video");
+  remotevideo.srcObject=stream;
+}
+
 export const showIncomingCallDialog = (
     callType,
     acceptCallHandler,
@@ -146,3 +159,22 @@ export const showInfoDialog = (preOfferAnswer) => {
     }
   };
   
+
+  // ui call buttons
+
+const micOnImgSrc = "./utils/images/mic.png";
+const micOffImgSrc = "./utils/images/micOff.png";
+
+export const updateMicButton = (micActive) => {
+  const micButtonImage = document.getElementById("mic_button_image");
+  micButtonImage.src = micActive ? micOffImgSrc : micOnImgSrc;
+};
+
+const cameraOnImgSrc = "./utils/images/camera.png";
+const cameraOffImgSrc = "./utils/images/cameraOff.png";
+
+export const updateCameraButton = (cameraActive) => {
+  const cameraButtonImage = document.getElementById("camera_button_image");
+  cameraButtonImage.src="none"
+  cameraButtonImage.src = cameraActive ? cameraOffImgSrc : cameraOnImgSrc;
+};
