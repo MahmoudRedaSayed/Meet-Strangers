@@ -60,7 +60,8 @@ export const showInfoDialog = (preOfferAnswer) => {
     if (preOfferAnswer === constants.preOfferAnswer.CALL_REJECTED) {
       infoDialog = elements.getInfoDialog(
         "Call rejected",
-        "Callee rejected your call"
+        "Callee rejected your call",
+        "Callee unavailable"
       );
     }
   
@@ -251,6 +252,16 @@ export const mediaStream=(callType)=>{
     clearMessenger();
     const newMessage=document.getElementById("new_message");
     hideElement(newMessage);
+    // if the caller end the call before the response
+    const dialog = document.getElementById("dialog");
+    dialog.querySelectorAll("*").forEach((dialog) => dialog.remove());
     //block panel
     enableDashboard();
+}
+
+export const showCallButtons=()=>{
+  const personal=document.getElementById("personal_code_video_button");
+  const stranger=document.getElementById("stranger_video_button");
+  showElement(personal);
+  showElement(stranger);
 }

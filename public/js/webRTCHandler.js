@@ -27,16 +27,22 @@ export const sendPreOffer = (callType, calleePersonalCode) => {
       calleePersonalCode,
     };
     ui.showCallingDialog(callingDialogRejectCallHandler);
+    store.setCallState(constants.callState.CALL_UNAVAILABLE)
     wss.sendPreOffer(data);
   }
 }
 
 
 export const preOfferHandler = (data) => {
-  console.log("the handler of the pre offer")
-  console.log("data", data)
   const { callType, callerSocketId } = data;
-
+  console.log(checkCallPossibility(callType),callType)
+  if(!checkCallPossibility(callType))
+  {
+    console.log("ahhh la")
+    return  sendPreOfferAnswer(constants.preOfferAnswer.CALL_UNAVAILABLE,callerSocketId);
+  }
+  
+  store.setCallState(constants.preOfferAnswer.CALL_UNAVAILABLE);
   connectedUserDetails = {
     socketId: callerSocketId,
     callType,
@@ -53,9 +59,17 @@ export const preOfferHandler = (data) => {
 
 const callingDialogRejectCallHandler = () => {
   console.log("end the call")
+  const data={
+    connectedUserSocketId:connectedUserDetails.socketId
+  }
+  wss.sendHangUp(data);
+  ui.mediaStream(connectedUserDetails.callType);
 }
 const acceptCallHandler = () => {
   console.log("call accepted");
+  console.log(store.getState().callState)
+  store.setCallState(constants.callState.CALL_UNAVAILABLE);
+  console.log(store.getState().callState)
   sendPreOfferAnswer(constants.preOfferAnswer.CALL_ACCEPTED);
   ui.showCallElements(connectedUserDetails.callType);
 };
@@ -67,31 +81,37 @@ const rejectCallHandler = () => {
 };
 
 
-const sendPreOfferAnswer = (preOfferAnswer) => {
+const sendPreOfferAnswer = (preOfferAnswer,SocketId=null) => {
+  const callerSocketId=SocketId?SocketId:connectedUserDetails.socketId;
   const data = {
-    callerSocketId: connectedUserDetails.socketId,
+    callerSocketId,
     preOfferAnswer,
   };
   ui.removeAllDialogs();
+  // store.setCallState(constants.preOfferAnswer.CALL_UNAVAILABLE);
   wss.sendPreOfferAnswer(data);
 };
 
 export const handlePreOfferAnswer = (data) => {
   const { preOfferAnswer } = data;
+  console.log("get answer",preOfferAnswer)
 
   ui.removeAllDialogs();
 
   if (preOfferAnswer === constants.preOfferAnswer.CALLEE_NOT_FOUND) {
+    setIncomingCallAvailable();
     ui.showInfoDialog(preOfferAnswer);
     // show dialog that callee has not been found
   }
 
   if (preOfferAnswer === constants.preOfferAnswer.CALL_UNAVAILABLE) {
+    setIncomingCallAvailable();
     ui.showInfoDialog(preOfferAnswer);
     // show dialog that callee is not able to connect
   }
 
   if (preOfferAnswer === constants.preOfferAnswer.CALL_REJECTED) {
+    setIncomingCallAvailable();
     ui.showInfoDialog(preOfferAnswer);
     // show dialog that call is rejected by the callee
   }
@@ -99,6 +119,7 @@ export const handlePreOfferAnswer = (data) => {
   if (preOfferAnswer === constants.preOfferAnswer.CALL_ACCEPTED) {
     ui.showCallElements(connectedUserDetails.callType);
     // send webRTC offer
+    store.setCallState(constants.callState.CALL_UNAVAILABLE);
     createPeerConnection();
     sendWebRTCOffer();
   }
@@ -109,9 +130,13 @@ export const handlePreOfferAnswer = (data) => {
 export const getLocalPreview = () => {
   navigator.mediaDevices.getUserMedia(defaultCon).then((stream => {
     ui.updateLocalVideo(stream);
+    ui.showCallButtons();
+    store.setCallState(constants.callState.CALL_AVAILABLE)
+    console.log("state",store.getState())
     store.setLocalStream(stream)
   })).catch()
   {
+    store.getState().callState=constants.callState.CALL_AVAILABLE_ONLY_CHAT;
     console.log("error in access devices");
   }
 }
@@ -178,6 +203,7 @@ const sendWebRTCOffer=async()=>{
     type:"OFFER",
     offer
   }
+  store.setCallState(constants.callState.CALL_UNAVAILABLE);
   wss.sendDataUsingWebRTCSignals(data)
 }
 
@@ -187,6 +213,13 @@ export const sendMessageUsingDataChannel = (message) => {
 };
 export const offerHandler=async(data)=>{
   peerConnection = new RTCPeerConnection(configurations);
+  peerConnection.onconnectionstatechange = (event) => {
+    if (peerConnection.connectionState === "connected") {
+      console.log("successfully connected to the other user")
+      console.log("from success",peerConnection)
+    }
+  }
+  
   dataChannel = peerConnection.createDataChannel("chat");
 
   peerConnection.ondatachannel = (event) => {
@@ -228,6 +261,7 @@ export const offerHandler=async(data)=>{
     type:"ANSWER",
     answer
   }
+  store.setCallState(constants.callState.CALL_UNAVAILABLE);
   wss.sendDataUsingWebRTCSignals(dataSent);
 }
 
@@ -240,7 +274,6 @@ export const answerHandler=async(data)=>{
 
 export const candidateHandler=async(data)=>{
   console.log("handle candidate");
-  // console.log(data);
   try {
     await peerConnection.addIceCandidate(data.candidate);
     console.log("from candidate",peerConnection);
@@ -315,10 +348,40 @@ export const hangUpHandler=()=>{
     connectedUserSocketId:connectedUserDetails.socketId
   }
   wss.sendHangUp(data);
+  peerConnection.close();
+  setIncomingCallAvailable();
   ui.mediaStream(connectedUserDetails.callType);
 }
 
 export const hangUpHandlerAnswer=()=>{
-  ui.mediaStream(connectedUserDetails.callType);
   console.log("answer the hang up")
+  // peerConnection.close();
+  setIncomingCallAvailable();
+  ui.mediaStream(connectedUserDetails.callType);
+}
+
+
+export const checkCallPossibility=(callType)=>{
+  console.log(callType,store.getState().callState);
+  if(store.getState().callState===constants.callState.CALL_AVAILABLE)
+  {
+    return true;
+  }
+  if(store.getState().callState===constants.callState.CALL_AVAILABLE_ONLY_CHAT&&(callType===constants.callType.VIDEO_PERSONAL_CODE||callType===constants.callType.VIDEO_STRANGER))
+  {
+    return false;
+  }
+  return false;
+}
+
+const setIncomingCallAvailable=()=>{
+  console.log("eh henal")
+  const localStream=store.getState().localStream;
+  if(localStream)
+  {
+    store.setCallState(constants.callState.CALL_AVAILABLE);
+  }
+  else{
+    store.setCallState(constants.callState.CALL_AVAILABLE_ONLY_CHAT);
+  }
 }

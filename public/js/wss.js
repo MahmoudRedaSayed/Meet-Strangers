@@ -31,6 +31,7 @@ socketIo=socket;
             webRTCHandler.candidateHandler(data)
             break;
           default:
+            ui.showInfoDialog(constants.preOfferAnswer.CALL_UNAVAILABLE);
             return;
 
         }
