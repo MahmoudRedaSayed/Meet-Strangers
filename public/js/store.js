@@ -4,7 +4,7 @@ let state={
     localStream:null,
     remoteStream:null,
     screenSharingStream:null,
-    AllowOtherToConnect:false,
+    allowConnectionsFromStrangers:false,
     activeSharingScreen:false,
     callState:constants.callState.CALL_AVAILABLE_ONLY_CHAT
 }
@@ -35,10 +35,10 @@ export const setRemoteStream=(stream)=>{
     }
 }
 
-export const setAllowOtherToConnect=(AllowOtherToConnect)=>{
+export const setAllowConnectionsFromStrangers=(allowConnectionsFromStrangers)=>{
     state={
         ...state,
-        AllowOtherToConnect
+        allowConnectionsFromStrangers
     }
 }
 

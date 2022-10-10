@@ -26,13 +26,11 @@ export const showIncomingCallDialog = (
       const callTypeInfo =
       callType === constants.callType.CHAT_PERSONAL_CODE ? "Chat" : "Video";
       
-      console.log("here")
       const incomingCallDialog = elements.getIncomingCallDialog(
           callTypeInfo,
           acceptCallHandler,
           rejectCallHandler
           );
-    console.log(incomingCallDialog)
   
     // removing all dialogs inside HTML dialog element
     const dialog = document.getElementById("dialog");
@@ -63,6 +61,11 @@ export const showInfoDialog = (preOfferAnswer) => {
         "Callee rejected your call",
         "Callee unavailable"
       );
+    }
+    if (preOfferAnswer === constants.preOfferAnswer.NO_STRANGERS) {
+      infoDialog = elements.getInfoDialog(
+        "Callee not found",
+        "no strangers available");
     }
   
     if (preOfferAnswer === constants.preOfferAnswer.CALLEE_NOT_FOUND) {
@@ -95,11 +98,11 @@ export const showInfoDialog = (preOfferAnswer) => {
   };
   
   export const showCallElements = (callType) => {
-    if (callType === constants.callType.CHAT_PERSONAL_CODE) {
+    if (callType === constants.callType.CHAT_PERSONAL_CODE||callType === constants.callType.CHAT_STRANGER) {
       showChatCallElements();
     }
   
-    if (callType === constants.callType.VIDEO_PERSONAL_CODE) {
+    if (callType === constants.callType.VIDEO_STRANGER||callType===constants.callType.VIDEO_PERSONAL_CODE) {
       showVideoCallElements();
     }
   };
@@ -264,4 +267,9 @@ export const showCallButtons=()=>{
   const stranger=document.getElementById("stranger_video_button");
   showElement(personal);
   showElement(stranger);
+}
+// put the arrow on the click
+export const updateStrangerCheckbox = (allowConnections) => {
+  const checkboxCheckImg = document.getElementById('allow_strangers_checkbox_image');
+  allowConnections ? showElement(checkboxCheckImg) : hideElement(checkboxCheckImg);
 }

@@ -4,6 +4,7 @@ import * as constants from "./constants.js"
 import * as webRTCHandler from "./webRTCHandler.js"
 import * as ui from "./ui.js"
 import * as recordingUtils from "./recordingUtils.js";
+import * as stranger from "./strangers.js"
 
 const socket = io("/");
 //stablish the connection
@@ -31,7 +32,6 @@ const personalCodeVideoButton = document.getElementById(
 );
 
 personalCodeChatButton.addEventListener("click", () => {
-  console.log("chat button clicked");
 
   const calleePersonalCode = document.getElementById(
     "personal_code_input"
@@ -42,7 +42,6 @@ personalCodeChatButton.addEventListener("click", () => {
 });
 
 personalCodeVideoButton.addEventListener("click", () => {
-  console.log("video button clicked");
 
   const calleePersonalCode = document.getElementById(
     "personal_code_input"
@@ -82,7 +81,6 @@ switchForScreenSharingButton.addEventListener("click", () => {
 
 const newMessageInput = document.getElementById("new_message_input");
 newMessageInput.addEventListener("keydown", (event) => {
-  console.log("change occured");
   const key = event.key;
 
   if (key === "Enter") {
@@ -100,6 +98,25 @@ sendMessageButton.addEventListener("click", () => {
   newMessageInput.value = "";
 });
 
+//strangers
+
+const strangerChatButton = document.getElementById('stranger_chat_button')
+strangerChatButton.addEventListener('click', () => {
+  stranger.getStrangerSocketIdAndConnect(constants.callType.CHAT_STRANGER);
+});
+
+const strangerVideoButton = document.getElementById('stranger_video_button')
+strangerVideoButton.addEventListener('click', () => {
+  stranger.getStrangerSocketIdAndConnect(constants.callType.VIDEO_STRANGER);
+}) 
+
+const checkbox = document.getElementById('allow_strangers_checkbox');
+checkbox.addEventListener('click', () => {
+  const checkboxState = store.getState().allowConnectionsFromStrangers;
+  ui.updateStrangerCheckbox(!checkboxState);
+  store.setAllowConnectionsFromStrangers(!checkboxState);
+  stranger.changeStrangerConnectionStatus(!checkboxState);
+})
 // recording
 
 const startRecordingButton = document.getElementById("start_recording_button");

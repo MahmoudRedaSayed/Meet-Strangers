@@ -2,13 +2,12 @@ import * as store from "./store.js"
 import * as ui from "./ui.js"
 import * as constants from "./constants.js"
 import * as webRTCHandler from "./webRTCHandler.js"
+import * as stranger from "./strangers.js"
 let socketIo=null
 export const registerNewUser=(socket)=>{
 // the event in client side called connect but in server side is connection
 socketIo=socket;
     socket.on("connect", () => {
-        console.log("succesfully connected to socket.io server");
-        console.log(socket.id);
         store.setSocketId(socket.id);
         ui.updatePersonalCode(socket.id);
       });
@@ -39,10 +38,12 @@ socketIo=socket;
       socket.on("hang-Up",()=>{
         webRTCHandler.hangUpHandlerAnswer();
       })
+      socket.on("stranger-socket-id",(data)=>{
+        stranger.connectWithStranger(data);
+      })
 }
 
 export const sendPreOffer = (data) => {
-    console.log("emmiting to server pre offer event");
     socketIo.emit("pre-offer", data);
   };
 
@@ -52,11 +53,18 @@ export const sendPreOffer = (data) => {
 
 
 export const sendDataUsingWebRTCSignals=(data)=>{
-  console.log("send data")
   socketIo.emit("WebRTC-Signal",data);
 }
 
 export const sendHangUp=(data)=>{
-  console.log("send signal");
   socketIo.emit("hang-Up",data)
+}
+
+
+export const changeStrangerConnectionStatus = (data) => {
+  socketIo.emit('stranger-connection-status', data)
+}
+
+export const getStrangerSocketId = () => {
+  socketIo.emit('get-stranger-socket-id');
 }

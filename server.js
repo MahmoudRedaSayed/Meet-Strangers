@@ -4,6 +4,7 @@ const http=require("http")
 const server=http.createServer(app);
 const io=require("socket.io")(server)
 let connectedPeers=[];
+let connectedPeersStrangers=[];
 io.on("connection",(socket)=>{
     connectedPeers.push(socket.id);
     console.log("the server is connected");
@@ -52,8 +53,38 @@ io.on("connection",(socket)=>{
 
       })
       socket.on("hang-Up",(data)=>{
+        const connectedUserSocketId=connectedPeers.find(person=>
+            person===data.connectedUserSocketId)
+        if(connectedUserSocketId)
+        {
         io.to(data.connectedUserSocketId).emit("hang-Up",data)
+        }
       })
+
+      socket.on('stranger-connection-status', data => {
+        const { status } = data;
+        console.log(status)
+        if(status){
+          connectedPeersStrangers.push(socket.id);
+        }else {
+          const newConnectedPeersStrangers = connectedPeersStrangers.filter(peerSocketId => peerSocketId !== socket.id);
+          connectedPeersStrangers = newConnectedPeersStrangers;
+        }
+    
+        console.log('connectedPeersStrangers', connectedPeersStrangers)
+      })
+    
+      socket.on('get-stranger-socket-id', () => {
+    
+        const filteredConnectedPeersStrangers = connectedPeersStrangers.filter((peerSocketId) => peerSocketId !== socket.id);
+    
+        const randomStrangerSocketId = filteredConnectedPeersStrangers.length > 0 
+                                          ? filteredConnectedPeersStrangers[Math.floor(Math.random() * filteredConnectedPeersStrangers.length)] 
+                                          : null;
+    
+        const data = {randomStrangerSocketId};
+        io.to(socket.id).emit('stranger-socket-id', data);
+      });
     socket.on("disconnect",()=>{
         connectedPeers=connectedPeers.filter((connected)=>connected!==socket.id)
         console.log("disconnect",connectedPeers);

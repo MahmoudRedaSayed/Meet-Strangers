@@ -10,6 +10,7 @@ export const callType = {
     CALL_ACCEPTED: "CALL_ACCEPTED",
     CALL_REJECTED: "CALL_REJECTED",
     CALL_UNAVAILABLE: "CALL_UNAVAILABLE",
+    NO_STRANGERS:"NO_STRANGERS"
   };
 
   export const WebRTCSignaling={
